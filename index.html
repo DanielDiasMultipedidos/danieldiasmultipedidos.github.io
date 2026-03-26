@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste Técnico: Motor de Cálculo de Pedidos</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3250;
+      --accent: #6c8aff;
+      --accent2: #a78bfa;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, #1a1d27 0%, #22263a 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108,138,255,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(108,138,255,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(108,138,255,0.3);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #e2e8f0 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+    .meta {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .meta-item span { color: var(--text); font-weight: 500; }
+
+    /* Callout */
+    .callout {
+      background: rgba(167,139,250,0.08);
+      border-left: 3px solid var(--accent2);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .callout strong { color: var(--text); font-style: normal; }
+
+    /* Sections */
+    section { margin-bottom: 2.5rem; }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.8rem;
+      height: 1.8rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #fff;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent2);
+      margin: 1.25rem 0 0.6rem;
+    }
+
+    /* Cards / Surfaces */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    /* Input list */
+    .input-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .input-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+    .input-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .input-label { font-weight: 600; color: var(--text); font-size: 0.9rem; }
+    .input-desc { color: var(--muted); font-size: 0.85rem; }
+
+    /* Rules */
+    .rules-list { display: grid; gap: 0.75rem; }
+    .rule {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+    }
+    .rule-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .rule-body { color: var(--muted); font-size: 0.875rem; }
+    .rule-body code {
+      background: rgba(108,138,255,0.12);
+      color: var(--accent);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 0.85em;
+    }
+
+    /* Formula */
+    .formula {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 1.1rem;
+      color: var(--green);
+      letter-spacing: 0.03em;
+    }
+
+    /* Code blocks */
+    .code-block {
+      background: #0d0f1a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      border-radius: 8px 8px 0 0;
+    }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-lang {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: monospace;
+      margin-left: auto;
+    }
+    .code-block pre {
+      padding: 1.25rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #c9d1d9;
+    }
+
+    /* Casos */
+    .casos { display: grid; gap: 1.5rem; }
+    .caso {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .caso-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .caso-num {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 5px;
+    }
+    .caso-title { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+    .caso-body { padding: 1.25rem; }
+
+    /* Criteria table */
+    .criteria {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .criteria th {
+      background: var(--surface2);
+      color: var(--accent);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.7rem 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .criteria td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .criteria tr:last-child td { border-bottom: none; }
+    .criteria tr:hover td { background: rgba(108,138,255,0.04); }
+    .criteria td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+    .criteria td:last-child { color: var(--muted); }
+
+    /* Tags */
+    .tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .tag {
+      background: rgba(52,211,153,0.1);
+      color: var(--green);
+      border: 1px solid rgba(52,211,153,0.25);
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .tag.warn {
+      background: rgba(251,191,36,0.1);
+      color: var(--yellow);
+      border-color: rgba(251,191,36,0.25);
+    }
+
+    /* Bonus */
+    .bonus-list {
+      list-style: none;
+      display: grid;
+      gap: 0.6rem;
+    }
+    .bonus-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .bonus-list li::before {
+      content: '★';
+      color: var(--yellow);
+      flex-shrink: 0;
+    }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+    /* JSON syntax highlight helpers */
+    .json-key { color: #79b8ff; }
+    .json-str { color: #9ecbff; }
+    .json-num { color: #f8c555; }
+    .json-bool { color: #f97583; }
+    .json-null { color: var(--muted); }
+
+    @media (max-width: 600px) {
+      body { padding: 1rem 0.75rem; }
+      .card { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="badge">Live Coding · Teste Técnico</div>
+    <h1>Motor de Cálculo de Pedidos</h1>
+    <p style="color:var(--muted); max-width:520px; margin: 0.5rem auto 0;">
+      Implemente o coração financeiro de uma plataforma de delivery: regras de desconto, frete e itens indisponíveis.
+    </p>
+    <div class="meta">
+      <div class="meta-item">⏱ Tempo: <span>40–50 min</span></div>
+      <div class="meta-item">🌐 Linguagem: <span>livre</span></div>
+      <div class="meta-item">🎯 Foco: <span>lógica &amp; clareza</span></div>
+    </div>
+  </header>
+
+  <!-- ── Resumo ── -->
+  <section>
+    <div class="callout">
+      <strong>Objetivo:</strong> Nossa plataforma conecta restaurantes e clientes, processando pedidos em tempo real.
+      O foco não é entregar um software completo ou otimizado para produção —
+      queremos observar como você <strong>analisa o problema</strong>, <strong>organiza a lógica</strong>
+      e <strong>comunica suas decisões</strong> ao longo do processo.
+    </div>
+  </section>
+
+  <!-- ── Dados de Entrada ── -->
+  <section>
+    <h2><span class="num">1</span> Dados de Entrada</h2>
+    <div class="card">
+      <div class="input-grid">
+        <div class="input-item">
+          <div class="input-icon">🧾</div>
+          <div>
+            <div class="input-label">Lista de itens</div>
+            <div class="input-desc">Nome, preço unitário, quantidade e se está disponível</div>
+          </div>
+        </div>
+        <div class="input-item">
+          <div class="input-icon">🏷️</div>
+          <div>
+            <div class="input-label">Cupom de desconto <em style="font-weight:400;color:var(--muted)">(opcional)</em></div>
+            <div class="input-desc">Código, tipo (<code style="color:var(--accent);background:rgba(108,138,255,0.12);padding:.1em .35em;border-radius:4px;font-size:.85em">percentual</code> ou <code style="color:var(--accent);background:rgba(108,138,255,0.12);padding:.1em .35em;border-radius:4px;font-size:.85em">fixo</code>), valor e teto máximo de desconto</div>
+          </div>
+        </div>
+        <div class="input-item">
+          <div class="input-icon">🛵</div>
+          <div>
+            <div class="input-label">Modalidade</div>
+            <div class="input-desc"><code style="color:var(--accent);background:rgba(108,138,255,0.12);padding:.1em .35em;border-radius:4px;font-size:.85em">delivery</code> ou <code style="color:var(--accent);background:rgba(108,138,255,0.12);padding:.1em .35em;border-radius:4px;font-size:.85em">retirada</code></div>
+          </div>
+        </div>
+        <div class="input-item">
+          <div class="input-icon">🍽️</div>
+          <div>
+            <div class="input-label">Configuração do restaurante</div>
+            <div class="input-desc">Taxa de entrega padrão e valor mínimo para frete grátis</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Regras de Negócio ── -->
+  <section>
+    <h2><span class="num">2</span> Regras de Negócio</h2>
+    <div class="rules-list">
+
+      <div class="rule">
+        <div class="rule-title">✅ 1. Itens disponíveis</div>
+        <div class="rule-body">
+          Filtrar itens com <code>disponivel: false</code> antes de calcular.
+          Eles não entram no subtotal e devem ser listados separadamente na saída.
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rule-title">🧮 2. Subtotal</div>
+        <div class="rule-body">
+          Somar <code>preco_unitario × quantidade</code> apenas dos itens disponíveis.
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rule-title">🏷️ 3. Desconto por cupom</div>
+        <div class="rule-body">
+          Tipo <code>percentual</code>: desconto = subtotal × (valor / 100)<br/>
+          Tipo <code>fixo</code>: desconto = valor do cupom (não pode exceder o subtotal)<br/>
+          Se houver <code>desconto_maximo</code>, o desconto final não pode ultrapassar esse teto<br/>
+          Sem cupom: desconto = 0
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rule-title">🚚 4. Taxa de entrega</div>
+        <div class="rule-body">
+          Modalidade <code>retirada</code>: sem taxa<br/>
+          Subtotal ≥ valor mínimo do restaurante: frete grátis<br/>
+          Subtotal &lt; valor mínimo: cobrar a taxa padrão do restaurante
+        </div>
+      </div>
+
+      <div class="rule">
+        <div class="rule-title">💰 5. Total final</div>
+        <div class="rule-body" style="margin-bottom:.75rem">Fórmula:</div>
+        <div class="formula">total = subtotal − desconto + taxa_entrega</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Saída Esperada ── -->
+  <section>
+    <h2><span class="num">3</span> Saída Esperada</h2>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#febc2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+        <div class="code-lang">json</div>
+      </div>
+      <pre>{
+  <span class="json-key">"subtotal"</span>:         <span class="json-num">69.00</span>,
+  <span class="json-key">"desconto"</span>:          <span class="json-num">6.90</span>,
+  <span class="json-key">"taxa_entrega"</span>:      <span class="json-num">0.00</span>,
+  <span class="json-key">"total"</span>:             <span class="json-num">62.10</span>,
+  <span class="json-key">"itens_removidos"</span>:   [<span class="json-str">"Sobremesa do Dia"</span>],
+  <span class="json-key">"observacoes"</span>:       [<span class="json-str">"Frete grátis aplicado"</span>]
+}</pre>
+    </div>
+  </section>
+
+  <!-- ── Casos de Teste ── -->
+  <section>
+    <h2><span class="num">4</span> Casos de Entrada e Saída</h2>
+    <div class="casos">
+
+      <!-- Caso 1 -->
+      <div class="caso">
+        <div class="caso-header">
+          <span class="caso-num">Caso 1</span>
+          <span class="caso-title">Cupom percentual com teto · item indisponível · frete grátis</span>
+        </div>
+        <div class="caso-body">
+          <h3>Entrada</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dot" style="background:#ff5f57"></div>
+              <div class="code-dot" style="background:#febc2e"></div>
+              <div class="code-dot" style="background:#28c840"></div>
+              <div class="code-lang">json</div>
+            </div>
+            <pre>{
+  <span class="json-key">"itens"</span>: [
+    { <span class="json-key">"nome"</span>: <span class="json-str">"Pizza Calabresa G"</span>, <span class="json-key">"preco_unitario"</span>: <span class="json-num">45.00</span>, <span class="json-key">"quantidade"</span>: <span class="json-num">1</span>, <span class="json-key">"disponivel"</span>: <span class="json-bool">true</span> },
+    { <span class="json-key">"nome"</span>: <span class="json-str">"Refrigerante 2L"</span>,   <span class="json-key">"preco_unitario"</span>: <span class="json-num">12.00</span>, <span class="json-key">"quantidade"</span>: <span class="json-num">2</span>, <span class="json-key">"disponivel"</span>: <span class="json-bool">true</span> },
+    { <span class="json-key">"nome"</span>: <span class="json-str">"Sobremesa do Dia"</span>,  <span class="json-key">"preco_unitario"</span>: <span class="json-num">18.00</span>, <span class="json-key">"quantidade"</span>: <span class="json-num">1</span>, <span class="json-key">"disponivel"</span>: <span class="json-bool">false</span> }
+  ],
+  <span class="json-key">"cupom"</span>: { <span class="json-key">"tipo"</span>: <span class="json-str">"percentual"</span>, <span class="json-key">"valor"</span>: <span class="json-num">10</span>, <span class="json-key">"desconto_maximo"</span>: <span class="json-num">5.00</span> },
+  <span class="json-key">"modalidade"</span>: <span class="json-str">"delivery"</span>,
+  <span class="json-key">"restaurante"</span>: {
+    <span class="json-key">"taxa_entrega"</span>: <span class="json-num">8.50</span>,
+    <span class="json-key">"frete_gratis_acima"</span>: <span class="json-num">60.00</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caso 2 -->
+      <div class="caso">
+        <div class="caso-header">
+          <span class="caso-num">Caso 2</span>
+          <span class="caso-title">Cupom fixo · taxa de entrega cobrada · sem itens removidos</span>
+        </div>
+        <div class="caso-body">
+          <h3>Entrada</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dot" style="background:#ff5f57"></div>
+              <div class="code-dot" style="background:#febc2e"></div>
+              <div class="code-dot" style="background:#28c840"></div>
+              <div class="code-lang">json</div>
+            </div>
+            <pre>{
+  <span class="json-key">"itens"</span>: [
+    { <span class="json-key">"nome"</span>: <span class="json-str">"X-Burguer Duplo"</span>, <span class="json-key">"preco_unitario"</span>: <span class="json-num">28.00</span>, <span class="json-key">"quantidade"</span>: <span class="json-num">1</span>, <span class="json-key">"disponivel"</span>: <span class="json-bool">true</span> },
+    { <span class="json-key">"nome"</span>: <span class="json-str">"Batata Frita M"</span>,  <span class="json-key">"preco_unitario"</span>: <span class="json-num">14.00</span>, <span class="json-key">"quantidade"</span>: <span class="json-num">1</span>, <span class="json-key">"disponivel"</span>: <span class="json-bool">true</span> }
+  ],
+  <span class="json-key">"cupom"</span>: { <span class="json-key">"tipo"</span>: <span class="json-str">"fixo"</span>, <span class="json-key">"valor"</span>: <span class="json-num">10.00</span>, <span class="json-key">"desconto_maximo"</span>: <span class="json-null">null</span> },
+  <span class="json-key">"modalidade"</span>: <span class="json-str">"delivery"</span>,
+  <span class="json-key">"restaurante"</span>: {
+    <span class="json-key">"taxa_entrega"</span>: <span class="json-num">8.50</span>,
+    <span class="json-key">"frete_gratis_acima"</span>: <span class="json-num">60.00</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caso 3 -->
+      <div class="caso">
+        <div class="caso-header">
+          <span class="caso-num">Caso 3</span>
+          <span class="caso-title">Retirada · sem cupom · item indisponível</span>
+        </div>
+        <div class="caso-body">
+          <h3>Entrada</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dot" style="background:#ff5f57"></div>
+              <div class="code-dot" style="background:#febc2e"></div>
+              <div class="code-dot" style="background:#28c840"></div>
+              <div class="code-lang">json</div>
+            </div>
+            <pre>{
+  <span class="json-key">"itens"</span>: [
+    { <span class="json-key">"nome"</span>: <span class="json-str">"Pizza Margherita M"</span>, <span class="json-key">"preco_unitario"</span>: <span class="json-num">35.00</span>, <span class="json-key">"quantidade"</span>: <span class="json-num">2</span>, <span class="json-key">"disponivel"</span>: <span class="json-bool">true</span> },
+    { <span class="json-key">"nome"</span>: <span class="json-str">"Suco de Laranja"</span>,    <span class="json-key">"preco_unitario"</span>: <span class="json-num">10.00</span>, <span class="json-key">"quantidade"</span>: <span class="json-num">1</span>, <span class="json-key">"disponivel"</span>: <span class="json-bool">false</span> }
+  ],
+  <span class="json-key">"cupom"</span>: <span class="json-null">null</span>,
+  <span class="json-key">"modalidade"</span>: <span class="json-str">"retirada"</span>,
+  <span class="json-key">"restaurante"</span>: {
+    <span class="json-key">"taxa_entrega"</span>: <span class="json-num">8.50</span>,
+    <span class="json-key">"frete_gratis_acima"</span>: <span class="json-num">60.00</span>
+  }
+}</pre>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /casos -->
+  </section>
+
+  <!-- ── O Que Avaliamos ── -->
+  <section>
+    <h2><span class="num">5</span> O Que Avaliamos</h2>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table class="criteria">
+        <thead>
+          <tr>
+            <th>Critério</th>
+            <th>O que observamos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Lógica</td>
+            <td>As regras foram aplicadas na ordem correta?</td>
+          </tr>
+          <tr>
+            <td>Clareza</td>
+            <td>O código é legível e os nomes fazem sentido?</td>
+          </tr>
+          <tr>
+            <td>Casos de borda</td>
+            <td>Teto do cupom atingido, todos os itens indisponíveis, sem cupom</td>
+          </tr>
+          <tr>
+            <td>Modelagem da saída</td>
+            <td>Como o candidato decide comunicar itens removidos?</td>
+          </tr>
+          <tr>
+            <td>Comunicação</td>
+            <td>O candidato pensa em voz alta e explica suas escolhas?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Restrições ── -->
+  <section>
+    <h2><span class="num">6</span> Restrições</h2>
+    <div class="card">
+      <div class="tags">
+        <span class="tag">Linguagem livre</span>
+        <span class="tag">Funções puras — sem API ou banco</span>
+        <span class="tag warn">Sem soluções prontas para o problema</span>
+        <span class="tag warn">Sintaxe: consulta permitida</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Bônus ── -->
+  <section>
+    <h2><span class="num">★</span> Bônus <em style="font-size:.85rem;font-weight:400;color:var(--muted)">(se sobrar tempo)</em></h2>
+    <div class="card">
+      <ul class="bonus-list">
+        <li>Escrever testes unitários para os cenários principais</li>
+        <li>Tratar o caso em que todos os itens estão indisponíveis (retornar erro antes de calcular)</li>
+        <li>Suporte a item com quantidade zero (ignorar ou retornar aviso)</li>
+      </ul>
+    </div>
+  </section>
+
+</div><!-- /container -->
+</body>
+</html>
